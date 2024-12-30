@@ -1,0 +1,304 @@
+/* General Reset */
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+    line-height: 1.8;
+    font-size: 16px;
+    background: linear-gradient(to bottom, #e0eafc, #cfdef3); /* Default background */
+    overflow-x: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Dark Mode for Body */
+body.dark-mode {
+    background: #121212 !important; /* Set to dark mode */
+    color: #f5f5f5 !important;
+}
+
+/* Container */
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Ensure photo is on top */
+.profile-photo {
+    position: relative; /* Position relative to its container */
+    z-index: 10; /* Bring the photo to the top */
+    margin-top: -100px; /* Pull the photo upwards */
+}
+
+.hero {
+    text-align: center;
+    padding: 100px 20px 150px; /* Add more padding at the bottom to avoid overlap */
+    background: linear-gradient(to right, #6a11cb, #2575fc); /* Default gradient */
+    color: white;
+    clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+    position: relative;
+    z-index: 1; /* Ensure it does not overlap the photo */
+}
+
+body.dark-mode .hero {
+    background: linear-gradient(to right, #333, #444); /* Dark mode gradient */
+}
+
+body.dark-mode .hero {
+    background: linear-gradient(to right, #333, #444); /* Dark mode gradient */
+}
+body.dark-mode a {
+    color: #61dafb;
+}
+
+
+/* CV Layout */
+.cv-layout {
+    display: flex;
+    gap: 40px;
+    margin-top: -50px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    background: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    padding: 20px;
+}
+
+body.dark-mode .cv-layout {
+    background: #1e1e1e; /* Dark mode background */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.6);
+}
+
+/* Profile Photo */
+.profile-photo {
+    flex: 1;
+    max-width: 300px; /* Original fixed size */
+    text-align: center;
+}
+
+.profile-photo img {
+    width: 100%;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.profile-photo img:hover {
+    transform: scale(1.1); /* Zoom on hover */
+}
+
+/* Content Section */
+.content {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.content-section {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+body.dark-mode .content-section {
+    background: #1e1e1e; /* Dark mode background for content */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.6);
+}
+
+/* Contact Links */
+.contact-links {
+    margin-top: 50px;
+    text-align: center;
+}
+
+.contact-btn {
+    padding: 12px 25px;
+    margin: 10px;
+    font-size: 1rem;
+    font-weight: 500;
+    color: white;
+    background: #2575fc;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+body.dark-mode .contact-btn {
+    background: #333;
+}
+
+.contact-btn:hover {
+    background: #1e63d9;
+    transform: translateY(-3px);
+}
+
+/* Footer */
+footer {
+    margin-top: 50px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #555;
+    padding: 20px 0;
+}
+
+body.dark-mode footer {
+    color: #aaa;
+}
+
+/* Dark Mode Toggle Button */
+.toggle-dark-mode {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 1rem;
+    border-radius: 25px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    z-index: 1000;
+    transition: all 0.3s ease-in-out;
+}
+
+.toggle-dark-mode:hover {
+    background: #45a049;
+    transform: scale(1.1);
+}
+
+body.dark-mode .toggle-dark-mode {
+    background: #ff5722;
+}
+
+body.dark-mode .toggle-dark-mode:hover {
+    background: #e64a19;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+    .cv-layout {
+        flex-direction: column; /* Stack layout on smaller screens */
+        align-items: center;
+    }
+
+    .profile-photo {
+        max-width: 200px;
+    }
+
+    .hero h1 {
+        font-size: 2.5rem;
+    }
+}
+[data-aos] {
+    transition: all 0.5s ease-in-out;
+}
+
+.contact-btn:hover {
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+.contact-btn:focus {
+    outline: 2px dashed #2575fc;
+    outline-offset: 4px;
+}
+
+
+/* Target the specific sections */
+.content-section {
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition for hover */
+}
+
+/* Apply hover effect */
+.content-section:hover {
+    transform: scale(1.02); /* Slight scaling effect */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Add a shadow for depth */
+}
+
+
+body.dark-mode .content-section:hover {
+    box-shadow: 0 8px 20px rgba(255, 255, 255, 0.2); /* Light shadow for dark background */
+}
+
+
+.hero {
+    position: relative;
+    text-align: center;
+    padding: 100px 20px;
+    color: white;
+    clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+    background: linear-gradient(45deg, #6a11cb, #2575fc, #ff5722);
+    background-size: 400% 400%; /* Makes the gradient larger for animation */
+    animation: gradientAnimation 8s infinite; /* Smooth color animation */
+}
+
+@keyframes gradientAnimation {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+
+/* Dark Mode Gradient Animation */
+body.dark-mode .hero {
+    background: linear-gradient(45deg, #3b1919, #1b2744, #21484d, #430146, #3c3f01);
+    background-size: 400% 400%; /* Create a larger gradient for smooth animation */
+    animation: darkModeGradient 10s ease infinite; /* Smooth infinite animation */
+}
+
+/* Keyframes for the Gradient Animation */
+@keyframes darkModeGradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    25% {
+        background-position: 50% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    75% {
+        background-position: 50% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+
+
+.typewriter {
+    overflow: hidden; /* Ensures only typed text is shown */
+    white-space: nowrap; /* Prevents wrapping */
+    border-right: 2px solid #ffffff; /* Simulates a typing cursor */
+    display: inline-block;
+    animation: blink-cursor 0.7s step-end infinite; /* Cursor blink effect */
+}
+
+@keyframes blink-cursor {
+    50% {
+        border-color: transparent;
+    }
+}
+
+
+
+
+.no-cursor {
+    border-right: none; /* Remove the cursor */
+    animation: none; /* Stop the blinking animation */
+}
