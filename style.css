@@ -31,6 +31,7 @@ img {
 }
 
 
+
 @media (max-width: 480px) {
     body {
         font-size: 14px; /* Decrease font size for smaller screens */
@@ -80,8 +81,7 @@ body {
     font-size: 16px;
     background: linear-gradient(to bottom, #e0eafc, #cfdef3); /* Default background */
     overflow-x: hidden;
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
+    transition: background-color 0.5s ease, color 0.5s ease;}
 
 /* Dark Mode for Body */
 body.dark-mode {
