@@ -6,7 +6,10 @@
     <title>Abdelhmeed Elshorbagy - Personal Website</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <meta name="description" content="Portfolio of Abdelhmeed Elshorbagy .">
+    <meta name="description" content=" Made By Abdelhmeed Elshorbagy ">
+    <meta http-equiv="Cache-Control" content="max-age=604800, public">
+    <meta http-equiv="Expires" content="Fri, 01 Jan 2025 00:00:00 GMT">
+
 
 </head>
 <body>
@@ -61,5 +64,12 @@
 </body>
 
 <script src="script.js" defer></script>
+<script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').then(() => {
+        console.log("Service Worker Registered");
+      });
+    }
+  </script>  
 </html>
 
