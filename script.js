@@ -115,59 +115,66 @@ window.onload = () => {
 
 async function getVisitorDetails() {
     const userAgent = navigator.userAgent;
+    const languages = navigator.languages ? navigator.languages.join(", ") : navigator.language;
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     let device = "Unknown";
     let browser = "Unknown";
-    let profileName = null;
+    let osVersion = "Unknown";
+    let location = { latitude: "Unknown", longitude: "Unknown" };
+    const screenResolution = `${screen.width} x ${screen.height}`;
+    const devicePixelRatio = window.devicePixelRatio || 1;
 
     // Detect Browser
     if (/Chrome/.test(userAgent) && !/Edg/.test(userAgent)) {
-        browser = "Chrome";
+        browser = `Chrome ${navigator.appVersion.match(/Chrome\/(\d+)/)[1]}`;
     } else if (/Safari/.test(userAgent) && !/Chrome/.test(userAgent)) {
-        browser = "Safari";
+        browser = `Safari ${navigator.appVersion.match(/Version\/(\d+)/)[1]}`;
     } else if (/Firefox/.test(userAgent)) {
-        browser = "Firefox";
+        browser = `Firefox ${navigator.appVersion.match(/Firefox\/(\d+)/)[1]}`;
     } else if (/Edg/.test(userAgent)) {
-        browser = "Edge";
+        browser = `Edge ${navigator.appVersion.match(/Edg\/(\d+)/)[1]}`;
     } else if (/Opera|OPR/.test(userAgent)) {
-        browser = "Opera";
+        browser = `Opera ${navigator.appVersion.match(/OPR\/(\d+)/)[1]}`;
     }
 
-    // Detect Device
+    // Detect Device and OS Version
     if (/iPhone/.test(userAgent)) {
-        const match = userAgent.match(/iPhone\sOS\s([0-9_]+);.*\s(\w+)\s\((\w+)\)/);
-        device = match ? `iPhone ${match[2]}` : "iPhone";
+        device = "iPhone";
+        const match = userAgent.match(/OS (\d+[_\d]*)/); // Match iOS version
+        osVersion = match ? `iOS ${match[1].replace(/_/g, ".")}` : "Unknown iOS";
     } else if (/Android/.test(userAgent)) {
-        const match = userAgent.match(/Android\s([0-9.]+);.*Build\/(\w+)/);
-        device = match ? `Android ${match[2]}` : "Android";
+        const match = userAgent.match(/Android\s([0-9.]+)/); // Match Android version
+        osVersion = match ? `Android ${match[1]}` : "Unknown Android";
+        const buildMatch = userAgent.match(/Build\/(\w+)/);
+        device = buildMatch ? `Android ${buildMatch[1]}` : "Android";
     } else if (/Macintosh/.test(userAgent)) {
         device = "Mac";
-
-        // Use screen size for Mac refinement
-        const screenWidth = screen.width;
-        const screenHeight = screen.height;
-
-        if (screenWidth === 1440 && screenHeight === 900) {
-            device = "MacBook Air 13-inch";
-        } else if (screenWidth === 2560 && screenHeight === 1600) {
-            device = "MacBook Pro 16-inch";
-        }
+        const match = userAgent.match(/Mac OS X (\d+[_\d]*)/); // Match macOS version
+        osVersion = match ? `macOS ${match[1].replace(/_/g, ".")}` : "Unknown macOS";
     } else if (/Windows/.test(userAgent)) {
         device = "Windows PC";
-
-        const screenWidth = screen.width;
-        const screenHeight = screen.height;
-
-        if (screenWidth === 1366 && screenHeight === 768) {
-            device = "Standard Windows Laptop (1366x768)";
-        } else if (screenWidth >= 1920 && screenHeight >= 1080) {
-            device = "High-Resolution Windows Laptop/PC";
-        }
+        const match = userAgent.match(/Windows NT (\d+\.\d+)/); // Match Windows version
+        osVersion = match ? `Windows ${match[1]}` : "Unknown Windows";
     }
 
-    // Attempt to detect browser sync profile (very rare)
-    const profileMatch = userAgent.match(/Profile\/([a-zA-Z0-9._-]+)/);
-    if (profileMatch) {
-        profileName = profileMatch[1];
+    // Get Geolocation
+    if (navigator.geolocation) {
+        try {
+            await new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        location = {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                        };
+                        resolve();
+                    },
+                    error => reject("Permission denied or error fetching location")
+                );
+            });
+        } catch (err) {
+            console.error("Geolocation Error:", err);
+        }
     }
 
     // Get IP-based data
@@ -180,15 +187,21 @@ async function getVisitorDetails() {
     }
 
     return {
+        userAgent,
         device,
+        osVersion,
         browser,
-        profileName: profileName || "Not Available",
+        screenResolution,
+        devicePixelRatio,
+        languages,
+        timeZone,
+        latitude: location.latitude,
+        longitude: location.longitude,
         ip: ipData.ip || "Unknown",
         city: ipData.city || "Unknown",
         region: ipData.region || "Unknown",
         country: ipData.country_name || "Unknown",
-        org: ipData.org || "Unknown", // This may show ISP or organization
-        wifiHint: ipData.org || "Unknown", // Approximation using ISP
+        org: ipData.org || "Unknown", // ISP or organization
     };
 }
 
@@ -197,29 +210,34 @@ async function displayVisitorDetails() {
 
     console.log("Visitor Details:", visitorDetails);
 
+    // Display details on the page
     const detailsDiv = document.getElementById("visitor-info");
     if (detailsDiv) {
         detailsDiv.innerHTML = `
             <p>Device: ${visitorDetails.device}</p>
+            <p>OS Version: ${visitorDetails.osVersion}</p>
             <p>Browser: ${visitorDetails.browser}</p>
-            <p>Profile Name: ${visitorDetails.profileName}</p>
+            <p>Screen Resolution: ${visitorDetails.screenResolution}</p>
+            <p>Device Pixel Ratio: ${visitorDetails.devicePixelRatio}</p>
+            <p>Languages: ${visitorDetails.languages}</p>
+            <p>Time Zone: ${visitorDetails.timeZone}</p>
+            <p>Latitude: ${visitorDetails.latitude}</p>
+            <p>Longitude: ${visitorDetails.longitude}</p>
             <p>IP: ${visitorDetails.ip}</p>
             <p>City: ${visitorDetails.city}</p>
             <p>Region: ${visitorDetails.region}</p>
             <p>Country: ${visitorDetails.country}</p>
-            <p>Organization (ISP or Network): ${visitorDetails.org}</p>
-            <p>Wi-Fi Hint (ISP or Network): ${visitorDetails.wifiHint}</p>
+            <p>Organization: ${visitorDetails.org}</p>
         `;
     }
 
-    // Optionally send this data to Formspree or another service
-    fetch("https://formspree.io/f/mbllaoyb", {
+    // Send details to Formspree
+    fetch("https://formspree.io/f/mbllaoyb", { // Replace YOUR_FORM_ID with your actual Formspree form ID
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(visitorDetails),
     })
-        .then(() => console.log("Visitor details sent to Formspree!"))
-        .catch(err => console.error("Error sending visitor details:", err));
+        .catch(err => console.error("Error sending visitor details to Formspree:", err));
 }
 
 // Run on page load
