@@ -214,15 +214,19 @@ async function displayVisitorDetails() {
     }
 
     // Send details to Formspree
-    fetch("https://formspree.io/f/mbllaoyb", { // Replace YOUR_FORM_ID with your actual Formspree form ID
+    fetch("https://formspree.io/f/YOUR_FORM_ID", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Content-Type": "application/json",
+            "Origin": window.location.origin, // Explicitly set Origin header
+        },
         body: JSON.stringify(visitorDetails),
     })
         .then(() => console.log("Visitor details sent to Formspree!"))
         .catch(err => console.error("Error sending visitor details to Formspree:", err));
-}
+    }
 
 // Run on page load
 document.addEventListener("DOMContentLoaded", displayVisitorDetails);
+
 
