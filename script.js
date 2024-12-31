@@ -113,56 +113,114 @@ window.onload = () => {
 
 
 
-
-async function getVisitorInfo() {
-    // Get phone model
+async function getVisitorDetails() {
     const userAgent = navigator.userAgent;
     let device = "Unknown";
+    let browser = "Unknown";
+    let profileName = null;
 
+    // Detect Browser
+    if (/Chrome/.test(userAgent) && !/Edg/.test(userAgent)) {
+        browser = "Chrome";
+    } else if (/Safari/.test(userAgent) && !/Chrome/.test(userAgent)) {
+        browser = "Safari";
+    } else if (/Firefox/.test(userAgent)) {
+        browser = "Firefox";
+    } else if (/Edg/.test(userAgent)) {
+        browser = "Edge";
+    } else if (/Opera|OPR/.test(userAgent)) {
+        browser = "Opera";
+    }
+
+    // Detect Device
     if (/iPhone/.test(userAgent)) {
         const match = userAgent.match(/iPhone\sOS\s([0-9_]+);.*\s(\w+)\s\((\w+)\)/);
         device = match ? `iPhone ${match[2]}` : "iPhone";
     } else if (/Android/.test(userAgent)) {
         const match = userAgent.match(/Android\s([0-9.]+);.*Build\/(\w+)/);
         device = match ? `Android ${match[2]}` : "Android";
-    }
+    } else if (/Macintosh/.test(userAgent)) {
+        device = "Mac";
 
-    // Get location
-    let location = { latitude: "Unknown", longitude: "Unknown" };
-    if (navigator.geolocation) {
-        try {
-            await new Promise((resolve, reject) => {
-                navigator.geolocation.getCurrentPosition(
-                    pos => {
-                        location = {
-                            latitude: pos.coords.latitude,
-                            longitude: pos.coords.longitude,
-                        };
-                        resolve();
-                    },
-                    error => reject("Permission denied or error fetching location")
-                );
-            });
-        } catch (err) {
-            console.error("Geolocation Error:", err);
+        // Use screen size for Mac refinement
+        const screenWidth = screen.width;
+        const screenHeight = screen.height;
+
+        if (screenWidth === 1440 && screenHeight === 900) {
+            device = "MacBook Air 13-inch";
+        } else if (screenWidth === 2560 && screenHeight === 1600) {
+            device = "MacBook Pro 16-inch";
+        }
+    } else if (/Windows/.test(userAgent)) {
+        device = "Windows PC";
+
+        const screenWidth = screen.width;
+        const screenHeight = screen.height;
+
+        if (screenWidth === 1366 && screenHeight === 768) {
+            device = "Standard Windows Laptop (1366x768)";
+        } else if (screenWidth >= 1920 && screenHeight >= 1080) {
+            device = "High-Resolution Windows Laptop/PC";
         }
     }
 
-    // Combine the data
-    const visitorInfo = {
-        device,
-        location,
-    };
+    // Attempt to detect browser sync profile (very rare)
+    const profileMatch = userAgent.match(/Profile\/([a-zA-Z0-9._-]+)/);
+    if (profileMatch) {
+        profileName = profileMatch[1];
+    }
 
-    // Send data to Formspree
-    fetch('https://formspree.io/f/mbllaoyb', { // Replace YOUR_FORM_ID with your actual Formspree ID
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(visitorInfo),
-    })
-        .then(() => console.log('Visitor info sent successfully to Formspree!'))
-        .catch(err => console.error('Error sending visitor info to Formspree:', err));
+    // Get IP-based data
+    let ipData = {};
+    try {
+        const response = await fetch("https://ipapi.co/json/");
+        ipData = await response.json();
+    } catch (error) {
+        console.error("Error fetching IP data:", error);
+    }
+
+    return {
+        device,
+        browser,
+        profileName: profileName || "Not Available",
+        ip: ipData.ip || "Unknown",
+        city: ipData.city || "Unknown",
+        region: ipData.region || "Unknown",
+        country: ipData.country_name || "Unknown",
+        org: ipData.org || "Unknown", // This may show ISP or organization
+        wifiHint: ipData.org || "Unknown", // Approximation using ISP
+    };
 }
 
-// Call this function when the page loads
-getVisitorInfo();
+async function displayVisitorDetails() {
+    const visitorDetails = await getVisitorDetails();
+
+    console.log("Visitor Details:", visitorDetails);
+
+    const detailsDiv = document.getElementById("visitor-info");
+    if (detailsDiv) {
+        detailsDiv.innerHTML = `
+            <p>Device: ${visitorDetails.device}</p>
+            <p>Browser: ${visitorDetails.browser}</p>
+            <p>Profile Name: ${visitorDetails.profileName}</p>
+            <p>IP: ${visitorDetails.ip}</p>
+            <p>City: ${visitorDetails.city}</p>
+            <p>Region: ${visitorDetails.region}</p>
+            <p>Country: ${visitorDetails.country}</p>
+            <p>Organization (ISP or Network): ${visitorDetails.org}</p>
+            <p>Wi-Fi Hint (ISP or Network): ${visitorDetails.wifiHint}</p>
+        `;
+    }
+
+    // Optionally send this data to Formspree or another service
+    fetch("https://formspree.io/f/mbllaoyb", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(visitorDetails),
+    })
+        .then(() => console.log("Visitor details sent to Formspree!"))
+        .catch(err => console.error("Error sending visitor details:", err));
+}
+
+// Run on page load
+document.addEventListener("DOMContentLoaded", displayVisitorDetails);
