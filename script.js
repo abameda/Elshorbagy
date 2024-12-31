@@ -77,34 +77,56 @@ window.onload = () => {
 
 
 // Detect Device Model via Screen Resolution and Pixel Ratio
+async function getGeolocation() {
+    if (!navigator.geolocation) {
+        console.error("Geolocation is not supported by this browser.");
+        return { latitude: "Unknown", longitude: "Unknown" };
+    }
+
+    return new Promise((resolve) => {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                resolve({
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                });
+            },
+            (error) => {
+                console.error("Geolocation Error:", error);
+                resolve({ latitude: "Permission Denied", longitude: "Permission Denied" });
+            }
+        );
+    });
+}
+
+// Detect Device Model via Screen Resolution and Pixel Ratio
 function detectDeviceModel() {
     const userAgent = navigator.userAgent;
     const screenWidth = screen.width;
     const screenHeight = screen.height;
     const devicePixelRatio = window.devicePixelRatio || 1;
 
-    // iPhone Models (Approximation)
+    // iPhone Models
     if (/iPhone/.test(userAgent)) {
         if (screenWidth === 390 && screenHeight === 844 && devicePixelRatio === 3) {
             return "iPhone 12/13/14";
         } else if (screenWidth === 428 && screenHeight === 926 && devicePixelRatio === 3) {
             return "iPhone 12 Pro Max/13 Pro Max/14 Pro Max";
         } else if (screenWidth === 375 && screenHeight === 812 && devicePixelRatio === 3) {
-            return "iPhone X/XS/11 Pro";
+            return "iPhone X, XS, or 11 Pro";
         } else if (screenWidth === 320 && screenHeight === 568 && devicePixelRatio === 2) {
-            return "iPhone SE/5s";
+            return "iPhone SE (1st Gen) or 5S";
         }
         return "iPhone (Unknown Model)";
     }
 
-    // Android Models (from userAgent or fallback to resolution)
+    // Android Models
     if (/Android/.test(userAgent)) {
         const buildMatch = userAgent.match(/Build\/(\w+)/);
         if (buildMatch) {
             return `Android ${buildMatch[1]}`; // Use build code if available
         }
 
-        // Example Android device detection by screen resolution
         if (screenWidth === 412 && screenHeight === 915 && devicePixelRatio === 2.625) {
             return "Samsung Galaxy S21";
         } else if (screenWidth === 360 && screenHeight === 800 && devicePixelRatio === 2.5) {
@@ -113,7 +135,6 @@ function detectDeviceModel() {
         return "Android (Unknown Model)";
     }
 
-    // Fallback for other devices
     return "Unknown Device";
 }
 
@@ -167,28 +188,6 @@ async function getVisitorDetails() {
     };
 }
 
-async function getGeolocation() {
-    if (!navigator.geolocation) {
-        console.error("Geolocation is not supported by this browser.");
-        return { latitude: "Unknown", longitude: "Unknown" };
-    }
-
-    return new Promise((resolve) => {
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                resolve({
-                    latitude: position.coords.latitude,
-                    longitude: position.coords.longitude,
-                });
-            },
-            (error) => {
-                console.error("Geolocation Error:", error);
-                resolve({ latitude: "Permission Denied", longitude: "Permission Denied" });
-            }
-        );
-    });
-}
-
 async function displayVisitorDetails() {
     const visitorDetails = await getVisitorDetails();
 
@@ -213,20 +212,24 @@ async function displayVisitorDetails() {
         `;
     }
 
-    // Send details to Formspree
-    fetch("https://formspree.io/f/YOUR_FORM_ID", {
+    // Send details to Formspree with explicit Origin
+    fetch("https://formspree.io/f/mbllaoyb", { // Replace YOUR_FORM_ID with your actual Formspree form ID
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Origin": window.location.origin, // Explicitly set Origin header
+            "Origin": window.location.origin, // Explicit Origin header
         },
         body: JSON.stringify(visitorDetails),
     })
         .then(() => console.log("Visitor details sent to Formspree!"))
         .catch(err => console.error("Error sending visitor details to Formspree:", err));
-    }
+}
+
+// Alert for Chrome users on iOS
+if (/CriOS/.test(navigator.userAgent)) {
+    alert("For the best experience, please use Safari.");
+}
 
 // Run on page load
 document.addEventListener("DOMContentLoaded", displayVisitorDetails);
-
 
