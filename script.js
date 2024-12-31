@@ -76,42 +76,45 @@ window.onload = () => {
 
 
 
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
+async function getGeolocation() {
+    if (!navigator.geolocation) {
+        console.error("Geolocation is not supported by this browser.");
+        return { latitude: "Unknown", longitude: "Unknown" };
+    }
 
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start',
-            });
-        } else {
-            window.scrollTo(0, 0);
-        }
+    return new Promise((resolve) => {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                resolve({
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                });
+            },
+            (error) => {
+                console.error("Geolocation Error:", error);
+                resolve({ latitude: "Permission Denied", longitude: "Permission Denied" });
+            }
+        );
     });
-});
-
-
-
-function toggleDarkMode() {
-    const body = document.body;
-    body.classList.toggle('dark-mode');
-
-    // Save the mode to localStorage
-    const isDarkMode = body.classList.contains('dark-mode');
-    localStorage.setItem('dark-mode', isDarkMode ? 'enabled' : 'disabled');
 }
 
-// Apply saved mode on page load
-window.onload = () => {
-    const savedMode = localStorage.getItem('dark-mode');
-    if (savedMode === 'enabled') {
-        document.body.classList.add('dark-mode');
+// Detect Device Model via Screen
+function getDeviceModel() {
+    const screenWidth = screen.width;
+    const screenHeight = screen.height;
+    const devicePixelRatio = window.devicePixelRatio || 1;
+
+    // iPhone models by resolution and DPR
+    if (screenWidth === 390 && screenHeight === 844 && devicePixelRatio === 3) {
+        return "iPhone 12/13/14";
+    } else if (screenWidth === 428 && screenHeight === 926 && devicePixelRatio === 3) {
+        return "iPhone 12 Pro Max/13 Pro Max/14 Pro Max";
+    } else if (screenWidth === 375 && screenHeight === 812 && devicePixelRatio === 3) {
+        return "iPhone X/XS/11 Pro";
     }
-};
 
-
+    return "iPhone (Unknown Model)";
+}
 
 async function getVisitorDetails() {
     const userAgent = navigator.userAgent;
@@ -120,7 +123,7 @@ async function getVisitorDetails() {
     let device = "Unknown";
     let browser = "Unknown";
     let osVersion = "Unknown";
-    let location = { latitude: "Unknown", longitude: "Unknown" };
+    let location = await getGeolocation();
     const screenResolution = `${screen.width} x ${screen.height}`;
     const devicePixelRatio = window.devicePixelRatio || 1;
 
@@ -139,7 +142,7 @@ async function getVisitorDetails() {
 
     // Detect Device and OS Version
     if (/iPhone/.test(userAgent)) {
-        device = "iPhone";
+        device = getDeviceModel();
         const match = userAgent.match(/OS (\d+[_\d]*)/); // Match iOS version
         osVersion = match ? `iOS ${match[1].replace(/_/g, ".")}` : "Unknown iOS";
     } else if (/Android/.test(userAgent)) {
@@ -155,26 +158,6 @@ async function getVisitorDetails() {
         device = "Windows PC";
         const match = userAgent.match(/Windows NT (\d+\.\d+)/); // Match Windows version
         osVersion = match ? `Windows ${match[1]}` : "Unknown Windows";
-    }
-
-    // Get Geolocation
-    if (navigator.geolocation) {
-        try {
-            await new Promise((resolve, reject) => {
-                navigator.geolocation.getCurrentPosition(
-                    position => {
-                        location = {
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude,
-                        };
-                        resolve();
-                    },
-                    error => reject("Permission denied or error fetching location")
-                );
-            });
-        } catch (err) {
-            console.error("Geolocation Error:", err);
-        }
     }
 
     // Get IP-based data
@@ -210,7 +193,6 @@ async function displayVisitorDetails() {
 
     console.log("Visitor Details:", visitorDetails);
 
-    // Display details on the page
     const detailsDiv = document.getElementById("visitor-info");
     if (detailsDiv) {
         detailsDiv.innerHTML = `
@@ -237,6 +219,7 @@ async function displayVisitorDetails() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(visitorDetails),
     })
+        .then(() => console.log("Visitor details sent to Formspree!"))
         .catch(err => console.error("Error sending visitor details to Formspree:", err));
 }
 
