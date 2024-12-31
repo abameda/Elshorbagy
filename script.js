@@ -225,3 +225,4 @@ async function displayVisitorDetails() {
 
 // Run on page load
 document.addEventListener("DOMContentLoaded", displayVisitorDetails);
+
