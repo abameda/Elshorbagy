@@ -14,14 +14,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Your Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyAL_802-Wn5wzJL3gUgTcdzSTZYTDVy7E8",
-  authDomain: "my-main-website-6ad22.firebaseapp.com",
-  databaseURL: "https://my-main-website-6ad22-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "my-main-website-6ad22",
-  storageBucket: "my-main-website-6ad22.firebasestorage.app",
-  messagingSenderId: "964683531952",
-  appId: "1:964683531952:web:ba117ffa66977891f85d75",
-  measurementId: "G-WHJR8MVBNV"
+    apiKey: "AIzaSyAL_802-Wn5wzJL3gUgTcdzSTZYTDVy7E8",
+    authDomain: "my-main-website-6ad22.firebaseapp.com",
+    databaseURL: "https://my-main-website-6ad22-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "my-main-website-6ad22",
+    storageBucket: "my-main-website-6ad22.firebasestorage.app",
+    messagingSenderId: "964683531952",
+    appId: "1:964683531952:web:ba117ffa66977891f85d75",
+    measurementId: "G-WHJR8MVBNV"
 };
 
 // Initialize Firebase
@@ -29,26 +29,82 @@ const app = firebase.initializeApp(firebaseConfig);
 const analytics = firebase.analytics(app);
 const database = firebase.database(app);
 
+database.ref('testConnection').set({ message: "Hello Firebase!" })
+    .then(() => console.log("Connection to Firebase successful"))
+    .catch((error) => console.error("Firebase connection error:", error));
+    
+
+
 // Function to send data to Firebase
-function sendDataToCloud(data) {
+function sendToFirebase(data) {
     const dbRef = database.ref('userTracking'); // Reference to 'userTracking' node
     dbRef.push(data)
         .then(() => console.log("Data successfully saved to Firebase:", data))
         .catch((error) => console.error("Error saving data to Firebase:", error));
 }
 
-// Test data collection on page load
-document.addEventListener("DOMContentLoaded", () => {
+// Function to collect and send visitor details
+async function collectAndSendVisitorDetails() {
     const userAgent = navigator.userAgent;
-    const trackingData = {
-        userAgent: userAgent,
-        page: window.location.href,
-        timeSpent: 0, // Placeholder for time spent
-        timestamp: new Date().toISOString(),
-    };
+    const startTime = new Date();
 
-    console.log("Sending data to Firebase:", trackingData); // Debug log
-    sendDataToCloud(trackingData);
+    // Function to get device details
+    function getDeviceDetails() {
+        let details = {
+            page: window.location.href, // Add the page URL at the top
+            userAgent: userAgent,
+            deviceModel: "Unknown Device", // Default value
+        };
+
+        if (/iPhone/.test(userAgent)) {
+            const screenWidth = screen.width;
+            const screenHeight = screen.height;
+            const devicePixelRatio = window.devicePixelRatio || 1;
+            if (screenWidth === 390 && screenHeight === 844 && devicePixelRatio === 3) {
+                details.deviceModel = "iPhone 13 or iPhone 14";
+            } else if (screenWidth === 428 && screenHeight === 926 && devicePixelRatio === 3) {
+                details.deviceModel = "iPhone 13 Pro Max or iPhone 14 Pro Max";
+            } else if (screenWidth === 375 && screenHeight === 812 && devicePixelRatio === 3) {
+                details.deviceModel = "iPhone X, XS, or iPhone 11 Pro";
+            } else {
+                details.deviceModel = "iPhone (Unknown Model)";
+            }
+        } else if (/Android/.test(userAgent)) {
+            const buildMatch = userAgent.match(/Build\/([\w-]+)/);
+            if (buildMatch && buildMatch[1]) {
+                details.deviceModel = "Android Device";
+                details.build = buildMatch[1]; // Explicitly label the build information
+            } else {
+                details.deviceModel = "Android (Unknown Model)";
+            }
+        } else if (/Macintosh/.test(userAgent)) {
+            details.deviceModel = "Macintosh (macOS)";
+        } else if (/Windows/.test(userAgent)) {
+            details.deviceModel = "Windows PC";
+        } else if (/Linux/.test(userAgent)) {
+            details.deviceModel = "Linux PC";
+        }
+
+        return details;
+    }
+
+    const deviceDetails = getDeviceDetails();
+    deviceDetails.timestamp = new Date().toISOString();
+
+    // Handle the "time spent" when leaving the page
+    window.addEventListener("beforeunload", () => {
+        const endTime = new Date();
+        deviceDetails.timeSpent = Math.round((endTime - startTime) / 1000); // Time spent in seconds
+
+        console.log("Device Details:", deviceDetails); // Debug log
+        sendToFirebase(deviceDetails); // Send details to Firebase
+    });
+}
+
+// Consolidate all page load actions into one listener
+document.addEventListener("DOMContentLoaded", () => {
+    collectAndSendVisitorDetails();
+});
 });
 
 
