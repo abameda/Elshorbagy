@@ -12,6 +12,45 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// Your Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyAL_802-Wn5wzJL3gUgTcdzSTZYTDVy7E8",
+    authDomain: "my-main-website-6ad22.firebaseapp.com",
+    projectId: "my-main-website-6ad22",
+    storageBucket: "my-main-website-6ad22.firebasestorage.app",
+    messagingSenderId: "964683531952",
+    appId: "1:964683531952:web:ba117ffa66977891f85d75",
+    measurementId: "G-WHJR8MVBNV",
+};
+
+// Initialize Firebase
+const app = firebase.initializeApp(firebaseConfig);
+const analytics = firebase.analytics(app);
+const database = firebase.database(app);
+
+// Function to send data to Firebase
+function sendDataToCloud(data) {
+    const dbRef = database.ref('userTracking'); // Reference to 'userTracking' node
+    dbRef.push(data)
+        .then(() => console.log("Data successfully saved to Firebase:", data))
+        .catch((error) => console.error("Error saving data to Firebase:", error));
+}
+
+// Test data collection on page load
+document.addEventListener("DOMContentLoaded", () => {
+    const userAgent = navigator.userAgent;
+    const trackingData = {
+        userAgent: userAgent,
+        page: window.location.href,
+        timeSpent: 0, // Placeholder for time spent
+        timestamp: new Date().toISOString(),
+    };
+
+    console.log("Sending data to Firebase:", trackingData); // Debug log
+    sendDataToCloud(trackingData);
+});
+
+
 document.addEventListener('DOMContentLoaded', () => {
     function typeWriterEffect(elementId, text, delay = 100) {
         const element = document.getElementById(elementId);
