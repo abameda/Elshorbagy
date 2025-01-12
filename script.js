@@ -105,7 +105,7 @@ async function collectAndSendVisitorDetails() {
 document.addEventListener("DOMContentLoaded", () => {
     collectAndSendVisitorDetails();
 });
-});
+
 
 
 document.addEventListener('DOMContentLoaded', () => {
