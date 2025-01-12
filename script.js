@@ -17,7 +17,7 @@ const firebaseConfig = {
     apiKey: "AIzaSyAL_802-Wn5wzJL3gUgTcdzSTZYTDVy7E8",
     authDomain: "my-main-website-6ad22.firebaseapp.com",
     projectId: "my-main-website-6ad22",
-    storageBucket: "my-main-website-6ad22.firebasestorage.app",
+    storageBucket: "https://my-main-website-6ad22-default-rtdb.europe-west1.firebasedatabase.app",
     messagingSenderId: "964683531952",
     appId: "1:964683531952:web:ba117ffa66977891f85d75",
     measurementId: "G-WHJR8MVBNV",
